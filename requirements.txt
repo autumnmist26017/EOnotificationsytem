@@ -1,0 +1,7 @@
+apscheduler
+sqlalchemy
+openai
+pandas
+selenium
+smtplib
+email
