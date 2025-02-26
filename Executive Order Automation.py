@@ -28,7 +28,7 @@ csv_file_path = 'EO_start_data.csv'
 df = pd.read_csv(csv_file_path)
 
 
-#create base SQL database with EO_start_data.csv
+#create base SQL database with EO_start_data.csv - ONLY RUN ONCE TO START DATABASE
 with engine.connect() as conn:
     conn.execute(text("""
     CREATE TABLE IF NOT EXISTS eo_table (
