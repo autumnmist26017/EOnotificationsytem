@@ -1,31 +1,31 @@
 from sqlalchemy import create_engine
+from sqlalchemy import text
 import time 
 import openai
 import pandas as pd
-
-
-# Replace these values with your actual PostgreSQL credentials
-user = 'jackstein'
-password = 'stitch2'
-host = 'localhost'  # Or your actual host
-port = '5432'  # Default port for PostgreSQL
-dbname = 'eo_database'
-
-# Create a connection string
-connection_string = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
-
-# Create an engine to connect to the database
-engine = create_engine(connection_string)
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import pandas as pd
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+
+# Replace these values with your actual PostgreSQL credentials
+user = 'USERNAME'
+password = 'PASSWORK'
+host = 'localhost'  # Or your actual host
+port = 'PORT_NUMBER'  # Default port for PostgreSQL
+dbname = 'DATABASE_NAME'
+
+# Create an engine to connect to the database
+connection_string = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
+engine = create_engine(connection_string)
 
 # Set up the Selenium WebDriver
-driver = webdriver.Chrome()  # Or the driver for your browser
+driver = webdriver.Chrome()  
 driver.get("https://www.federalregister.gov/presidential-documents/executive-orders/donald-trump/2025")
 
-# Wait for the page to load (optional)
 driver.implicitly_wait(10)
 
 # Extract executive orders
@@ -41,7 +41,6 @@ driver.quit()
 
 current_data = pd.DataFrame(data)
 
-from sqlalchemy import text
 
 with engine.connect() as conn:
     conn.execute(text("""
@@ -62,30 +61,20 @@ def fetch_table_as_dataframe(table_name, engine):
 
 # Function to compare two tables and find columns unique to the second table
 def find_unique_columns(table1_name, table2_name, column_name, engine):
-    # Load the tables into DataFrames
     table1 = fetch_table_as_dataframe(table1_name, engine)
     table2 = fetch_table_as_dataframe(table2_name, engine)
-
-    # Filter the tables by the comparison column
     table1_values = set(table1[column_name])
     table2_values = set(table2[column_name])
-
-    # Find values unique to the second table
     unique_values = table2_values - table1_values
-
     return unique_values
 
 # Function to create a new table containing all rows from the second table where unique values occur
 def create_filtered_table(unique_values, source_table_name, target_table_name, column_name, engine):
-    # Check if unique_values is empty
     if not unique_values:
         print("No unique values provided. Skipping table creation.")
         return
-
-    # Convert unique values to a comma-separated string for SQL query
     unique_values_str = ', '.join([f"'{value}'" for value in unique_values])
 
-    # Create SQL query to select rows where the column matches unique values
     from sqlalchemy import text
 
     query = text(f"""
@@ -93,10 +82,11 @@ def create_filtered_table(unique_values, source_table_name, target_table_name, c
     SELECT *
     FROM {source_table_name}
     WHERE {source_table_name}."{column_name}" IN ({unique_values_str});
-    """)
+    "")
 
     with engine.connect() as connection:
         connection.execute(query)
+
 
 table1_name = "eo_table"  # First table name
 table2_name = "current_eo_table"  # Second table name
@@ -104,22 +94,14 @@ comparison_column = "EO_id"  # Column for comparison
 target_table_name = "filtered_current_eo_table"  # Name of the new table
 
 unique_values = find_unique_columns(table1_name, table2_name, comparison_column, engine)
-
-# Create a new table with the filtered rows
 create_filtered_table(unique_values, table2_name, target_table_name, comparison_column, engine)
 
 print(f"Table '{target_table_name}' created with rows from '{table2_name}' where {comparison_column} matches unique values.")
 
 unique_values_str = ', '.join([f"'{value}'" for value in unique_values])
 
-print(unique_values_str)
-
 EO_ids = [eo.strip().strip("'") for eo in unique_values_str.split(',')]
 
-print(EO_ids)
-
-from sqlalchemy import text
-import pandas as pd
 
 query = text("""
 SELECT * 
@@ -131,11 +113,6 @@ with engine.connect() as conn:
     result = conn.execute(query, {'EO_ids': tuple(EO_ids)})
     new_EOs = pd.DataFrame(result.fetchall(), columns=result.keys())
 
-
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
-# Initialize the WebDriver (adjust to your specific WebDriver setup)
 driver = webdriver.Chrome()
 
 # Iterate through the DataFrame rows
@@ -153,10 +130,7 @@ for index, row in new_EOs.iterrows():
 driver.quit()
 
 
-
-# Replace YOUR_API_KEY with your actual API key
-openai.api_key = "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"
-
+openai.api_key = "API_KEY" # ENSURE OPENAI VERSION 0.28 OR LESS
 
 
 def generate_summary(prompt, word_limit=100):
@@ -172,10 +146,6 @@ def generate_summary(prompt, word_limit=100):
     )
     return completion.choices[0].message['content']
 
-# Example DataFrame
-# df = pd.DataFrame({'all': ['Text1', 'Text2', 'Text3']})  # Replace with your actual DataFrame
-
-# Add a summary column to the DataFrame
 new_EOs['summary'] = None
 
 for index, row in new_EOs.iterrows():
@@ -185,21 +155,15 @@ for index, row in new_EOs.iterrows():
             summary = generate_summary(text_to_summarize)
             new_EOs.at[index, 'summary'] = summary
             print(f"Row {index} summarized.")
-        
-        # Add a delay to avoid hitting API rate limits
-        time.sleep(2)  # Adjust the delay as needed
+    
+        time.sleep(2) 
     except Exception as e:
         print(f"Error summarizing row {index}: {e}")
 
-
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
 # Email details
-sender_email = "eonotificationsystem@gmail.com"
-receiver_email = "Jodymstein@gmail.com"
-password = "nmdv eute vgnu hgaj"  # App-specific password for Gmail
+sender_email = "SENDER_EMAIL"
+receiver_email = "RECIEVER_EMAIL"
+password = "PASSWORD"  
 
 
 if new_EOs.empty:
@@ -224,6 +188,7 @@ else:
         except Exception as e:
             print(f"Error: {e}")
 
+#APPEND DATABASE 
 new_EOs.rename(columns={'Title': 'title'}, inplace=True)
 new_EOs.rename(columns={'all_text': 'full_text'}, inplace=True)
 new_EOs.to_sql('eo_table', engine, if_exists='append', index=False)
