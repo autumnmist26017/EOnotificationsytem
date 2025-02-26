@@ -22,6 +22,26 @@ dbname = 'DATABASE_NAME'
 connection_string = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
 engine = create_engine(connection_string)
 
+csv_file_path = 'EO_start_data.csv'
+
+# Load the CSV file into a DataFrame
+df = pd.read_csv(csv_file_path)
+
+
+#create base SQL database with EO_start_data.csv
+with engine.connect() as conn:
+    conn.execute(text("""
+    CREATE TABLE IF NOT EXISTS eo_table (
+        title TEXT,
+        Link TEXT,
+        EO_id TEXT PRIMARY KEY,
+        full_text TEXT,
+        summary TEXT
+    );
+    """))
+
+df.to_sql('eo_table', engine, if_exists='replace', index=False)
+
 # Set up the Selenium WebDriver
 driver = webdriver.Chrome()  
 driver.get("https://www.federalregister.gov/presidential-documents/executive-orders/donald-trump/2025")
