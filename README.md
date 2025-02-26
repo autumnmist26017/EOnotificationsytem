@@ -27,7 +27,7 @@ This app is ideal for researchers, analysts, and policy enthusiasts who want to 
 ### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/autumnmist26017/EOnotificationsytem.git
-cd executive-order-tracker
+cd EOnotificationsytem
 ```
 
 ### Step 2: Set Up a Virtual Environment
@@ -63,7 +63,7 @@ Update the database credentials in the `connection_string` variable in the scrip
 ### Step 5: Run the Script
 Start the EO Tracker:
 ```bash
-python tracker.py
+Executive_Order_Automation.py
 ```
 
 ---
