@@ -4,7 +4,7 @@ from datetime import datetime
 
 def job():
     # Execute your script using subprocess
-    subprocess.run(['/Users/jackstein/Desktop/.venv/bin/python', '/Users/jackstein/Desktop/Executive Order Automation.py'])
+    subprocess.run(['PATH_TO_EXECUTIVE_ORDER_AUTOMATION.PY'])
 
 def within_working_hours():
     current_time = datetime.now().hour
