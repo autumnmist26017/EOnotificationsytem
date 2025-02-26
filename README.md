@@ -1,12 +1,14 @@
 Executive Order Tracker
+
 About This App
-The Executive Order Tracker is a Python-based automation tool designed to track, summarize, and manage U.S. Presidential Executive Orders (EOs). It leverages web scraping, AI summarization, and database management to keep users informed of new EOs. This tool is particularly useful for researchers, analysts, and policy enthusiasts who want to stay updated on executive actions.
+The Executive Order Tracker is a Python-based automation tool that tracks, summarizes, and manages U.S. Presidential Executive Orders (EOs). It leverages web scraping, AI summarization, and database management to keep users informed of new EOs. This tool is particularly useful for researchers, analysts, and policy enthusiasts who want to stay updated on executive actions.
 
 Key Features
+
 Data Extraction: Scrapes the Federal Register for the latest EOs and their metadata (titles, IDs, links).
 AI Summarization: Uses OpenAI GPT-4 to generate concise summaries of EO texts.
 Database Management: Stores EO data in a PostgreSQL database and identifies newly issued orders.
-Email Notifications: Sends alerts summarizing new EOs, complete with links to their full text.
+Email Notifications: Sends alerts summarizing new EOs with links to their full text.
 Data Visualization Ready: Data is saved in a structured format for easy integration with dashboards or reports.
 How to Run This App Locally
 Prerequisites
@@ -17,10 +19,8 @@ Step 1: Clone the Repository
 Clone this repository to your local machine:
 
 bash
-Copy
-Edit
-git clone https://github.com/your-repo/executive-order-tracker.git
-cd executive-order-tracker
+git clone https://github.com/autumnmist26017/EOnotificationsytem.git
+cd EOnotificationsytem
 Step 2: Set Up a Virtual Environment
 It is recommended to use a virtual environment for package management:
 
@@ -35,8 +35,6 @@ Edit
 source venv/bin/activate
 On Windows:
 bash
-Copy
-Edit
 venv\Scripts\activate
 Step 3: Install Dependencies
 Install the required packages:
