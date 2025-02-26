@@ -102,7 +102,7 @@ def create_filtered_table(unique_values, source_table_name, target_table_name, c
     SELECT *
     FROM {source_table_name}
     WHERE {source_table_name}."{column_name}" IN ({unique_values_str});
-    "")
+    """)
 
     with engine.connect() as connection:
         connection.execute(query)
